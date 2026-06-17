@@ -9,9 +9,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FixedWindowRateLimiter {
 
     private ConcurrentHashMap<String, AtomicInteger> map = new ConcurrentHashMap<>();
-    private int requestLimit = 5;
-    private long WINDOWS_FRAME = 500; //0,5 sec
+    private int requestLimit;
+    private long WINDOWS_FRAME; //0,5 sec
     private long windowsStart = System.currentTimeMillis();
+
+    public FixedWindowRateLimiter(int limit, long windowsInMs) {
+        this.requestLimit = limit;
+        this.WINDOWS_FRAME = windowsInMs;
+    }
 
     synchronized boolean allowRequest(String userId) {
         long currentTime = System.currentTimeMillis();
