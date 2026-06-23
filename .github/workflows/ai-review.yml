@@ -1,0 +1,36 @@
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Run tests and analyzers
+        run: |
+          mvn test
+          mvn checkstyle:checkstyle
+          mvn spotbugs:spotbugs
+
+      - name: Get PR diff
+        run: |
+          git fetch origin main
+          git diff origin/main...HEAD > pr.diff
+
+      - name: Send to AI reviewer
+        run: |
+          python .github/scripts/ai_review.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
