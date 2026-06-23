@@ -1,9 +1,11 @@
 import os
 import requests
 from anthropic import Anthropic
+from google import genai
 
 
 MODEL = "claude-sonnet-4"
+MODEL_GEMINI = "gemini-2.5-flash"
 
 
 def read_file(path: str) -> str:
@@ -67,6 +69,18 @@ def call_claude(prompt: str) -> str:
 
     return "\n".join(result)
 
+def call_gemini(prompt: str) -> str:
+    client = genai.Client(
+        api_key=os.environ["GEMINI_API_KEY"]
+    )
+
+    response = client.models.generate_content(
+        model=MODEL_GEMINI,
+        contents=prompt
+    )
+
+    return response.text
+
 def post_pr_comment(comment: str) -> None:
     token = os.environ["GITHUB_TOKEN"]
     repository = os.environ["GITHUB_REPOSITORY"]
@@ -100,7 +114,8 @@ def main():
     print("Generating AI review...")
 
     prompt = build_prompt(diff)
-    review = call_claude(prompt)
+    # review = call_claude(prompt)
+    review = call_gemini(prompt)
     
     comment = f"""
     
