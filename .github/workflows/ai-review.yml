@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install anthropic requests
+          pip install anthropic requests google-genai
 
       - name: Send to AI reviewer
         run: |
