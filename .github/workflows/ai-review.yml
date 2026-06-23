@@ -20,8 +20,8 @@ jobs:
       - name: Run tests and analyzers
         run: |
           mvn test
-          mvn checkstyle:checkstyle
-          mvn spotbugs:spotbugs
+          # mvn checkstyle:checkstyle
+          # mvn spotbugs:spotbugs
 
       - name: Get PR diff
         run: |

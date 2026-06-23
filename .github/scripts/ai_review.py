@@ -1,11 +1,15 @@
 import os
 import requests
+import time
 from anthropic import Anthropic
 from google import genai
+from google.genai import errors
 
 
 MODEL = "claude-sonnet-4"
 MODEL_GEMINI = "gemini-2.5-flash"
+
+MAX_RETRIES = 7
 
 
 def read_file(path: str) -> str:
@@ -74,12 +78,21 @@ def call_gemini(prompt: str) -> str:
         api_key=os.environ["GEMINI_API_KEY"]
     )
 
-    response = client.models.generate_content(
-        model=MODEL_GEMINI,
-        contents=prompt
-    )
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = client.models.generate_content(
+                model=MODEL_GEMINI,
+                contents=prompt,
+            )
+            return response.text
 
-    return response.text
+        except errors.ServerError as e:
+            if attempt == MAX_RETRIES - 1:
+                raise
+
+            wait = 2 ** attempt
+            print(f"Gemini unavailable, retrying in {wait}s...")
+            time.sleep(wait)
 
 def post_pr_comment(comment: str) -> None:
     token = os.environ["GITHUB_TOKEN"]
